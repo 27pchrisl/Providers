@@ -279,6 +279,12 @@ class Provider extends AbstractProvider implements SocialiteProvider
         $entityId = $this->getConfig('entityid');
 
         if (!$entityId) {
+            $entityDescriptors = $metadata->getAllEntityDescriptors();
+
+            if (count($entityDescriptors) > 1) {
+                throw new MissingConfigException('A configured entity id is required if there is more than one IDP descriptor present in the the metadata.');
+            }
+
             return Arr::first($metadata->getAllEntityDescriptors());
         }
 
@@ -309,7 +315,7 @@ class Provider extends AbstractProvider implements SocialiteProvider
         Cache::forever(self::METADATA_CACHE_KEY_TTL, time());
 
         try {
-            $xml = (string) $this->getHttpClient()
+            $xml = (string)$this->getHttpClient()
                 ->get($metadataUrl)
                 ->getBody();
 
@@ -438,7 +444,7 @@ class Provider extends AbstractProvider implements SocialiteProvider
     {
         $methods = [
             SamlConstants::BINDING_SAML2_HTTP_REDIRECT => 'GET',
-            SamlConstants::BINDING_SAML2_HTTP_POST     => 'POST',
+            SamlConstants::BINDING_SAML2_HTTP_POST => 'POST',
         ];
 
         if (!array_key_exists($bindingType, $methods)) {
